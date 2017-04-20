@@ -102,3 +102,72 @@ function zn_render($FILE, $DATA = array()) {
   extract($DATA, EXTR_SKIP);
   require $FILE;
 }
+
+/**
+ * ファイルをロックしてオープンする
+ * @param string $filename ファイルパス
+ * @param string $mode アクセス形式
+ * @param int [$operation] ロック方法。省略した場合、アクセス形式から推測される。
+ * @return resource|null ファイルポインタ
+ */
+function zn_file_open($filename, $mode, $operation = null) {
+  $fp = fopen($filename, $mode);
+  if (!$fp) return null;
+  if ($operation === null) $operation = ($mode === 'r') ? LOCK_SH : LOCK_EX;
+  if (!flock($fp, $operation)) {
+    fclose($fp); // 失敗したので閉じる
+    return null;
+  }
+  return $fp;
+}
+
+/**
+ * ファイルをロックを外してクローズする
+ * @param resource $fp ファイルポインタ
+ */
+function zn_file_close($fp) {
+  if ($fp) {
+    flock($fp, LOCK_UN); // 失敗してもクローズするので条件には入れない
+    fclose($fp);
+    $fp = null;
+  }
+}
+
+/**
+ * ファイルを文字列として全部読み込む
+ * PHP 5.2.6以前はfile_get_contentsはlockするオプションがないため、このような書き方をする必要がある。
+ * @param resource $fp ファイルポインタ
+ * @return string 読み込んだ文字列
+ * @example
+ *   if (($fp = zn_file_open('data.txt'))) {
+ *     $data = zn_file_read($fp);
+ *     zn_file_close($fp);
+ *   }
+ */
+function zn_file_read($fp) {
+  return rewind($fp) ? (string) stream_get_contents($fp) : null; // 存在しないfpの場合は標準のエラーを投げさせる。
+}
+
+/**
+ * ファイルにデータを全部書き込む（追記ではない）
+ * @param resource $fp ファイルポインタ
+ * @param string $data 書き込む値
+ * @return bool 書き込みに成功したかどうか
+ * @example
+ *   if (($fp = zn_file_open('data.txt', 'r+'))) {
+ *     zn_file_write($fp, 'text');
+ *     zn_file_close($fp);
+ *   }
+ */
+function zn_file_write($fp, $data) {
+  if ($fp && rewind($fp)) {
+    ignore_user_abort(true);
+    $result = fwrite($fp, $data);
+    if ($result !== false) {
+      fflush($fp);
+      ftruncate($fp, $result);
+      return true;
+    }
+  }
+  return false;
+}

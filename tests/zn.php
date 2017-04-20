@@ -20,3 +20,17 @@ unset($arr);
 
 // h
 green('&lt;img onload=&quot;alert(&#039;xss&#039;)&quot;&gt;', h('<img onload="alert(\'xss\')">'));
+
+// zn_file_*
+$fp = zn_file_open(__FILE__, 'r+');
+if (green(isset($fp))) {
+  green(file_get_contents(__FILE__), zn_file_read($fp));
+}
+zn_file_close($fp);
+
+$tp = tmpfile();
+green(zn_file_write($tp, 'foo'));
+green('foo', zn_file_read($tp));
+green(zn_file_write($tp, 'bar'));
+green('bar', zn_file_read($tp));
+fclose($tp);
