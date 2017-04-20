@@ -82,3 +82,12 @@ function zn_elapsed_time() {
 function zn_array_get(&$value, $default_value = null) {
   return isset($value) ? $value : $default_value;
 }
+
+/**
+ * HTMLエスケープ。よく使うのでzn_hではなくh。
+ * @param mixed $str エスケープしたい値（内部で文字列にキャストされる）
+ * @return string HTMLエスケープされた文字列
+ */
+function h($str) {
+  return htmlentities($str, ENT_QUOTES, mb_internal_encoding());
+}

@@ -17,3 +17,6 @@ green(null, zn_array_get($arr['hoge']));
 green('iroha', zn_array_get($arr['hoge'], 'iroha'));
 green(!isset($arr['hoge']));
 unset($arr);
+
+// h
+green('&lt;img onload=&quot;alert(&#039;xss&#039;)&quot;&gt;', h('<img onload="alert(\'xss\')">'));
