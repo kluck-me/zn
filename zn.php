@@ -91,3 +91,14 @@ function zn_array_get(&$value, $default_value = null) {
 function h($str) {
   return htmlentities($str, ENT_QUOTES, mb_internal_encoding());
 }
+
+/**
+ * テンプレート描画
+ * @param string $FILE テンプレートのパス
+ * @param array $DATA 展開する引数
+ * 引数を大文字にすることでテンプレート先でもわかりやすく使えるようにしている。
+ */
+function zn_render($FILE, $DATA = array()) {
+  extract($DATA, EXTR_SKIP);
+  require $FILE;
+}
